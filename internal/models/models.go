@@ -73,3 +73,18 @@ type Rate struct {
 type ShipHawkResponse struct {
 	Rates []Rate `json:"rates"`
 }
+
+type Carrier struct {
+	Code        string `json:"code"`
+	CarrierType struct {
+		Code string `json:"code"`
+	} `json:"carrier_type"`
+	Name                string   `json:"name"`
+	IsEnabled           bool     `json:"is_enabled"`
+	Activatable         bool     `json:"activatable"`
+	RequiredCredentials []string `json:"required_credentials"`
+	OptionalCredentials []string `json:"optional_credentials"`
+	TestMode            bool     `json:"test_mode"`
+	Status              string   `json:"status"`
+	Logo                string   `json:"logo"`
+}

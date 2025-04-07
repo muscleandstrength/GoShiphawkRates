@@ -20,14 +20,21 @@ func main() {
 
 	// Create services
 	shipHawkService := services.NewShipHawkService(cfg)
+	carrierService := services.NewCarrierService(cfg)
+
+	// Initialize carrier service
+	if err := carrierService.Initialize(); err != nil {
+		log.Fatalf("Failed to initialize carrier service: %v", err)
+	}
 
 	// Create handlers
-	handler := api.NewHandler(shipHawkService)
+	handler := api.NewHandler(shipHawkService, carrierService)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()
 
 	// API routes
+	mux.HandleFunc("GET /api/carriers", handler.GetCarriers)
 	mux.HandleFunc("POST /api/quote", handler.GetRateQuotes)
 
 	// Serve static files for the frontend

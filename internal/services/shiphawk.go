@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 
 	"github.com/muscleandstrength/GoShiphawkRates/internal/config"
@@ -31,6 +33,11 @@ func (s *ShipHawkService) GetRateQuotes(req *models.ShipmentRequest) (*models.Sh
 		DestinationAddress: req.DestinationAddress,
 		WarehouseCode:      req.WarehouseCode,
 		CarrierFilter:      req.CarrierFilter,
+	}
+
+	// If no warehouse ID is set, provide a default
+	if len(shipHawkReq.WarehouseCode) == 0 {
+		shipHawkReq.WarehouseCode = "01"
 	}
 
 	// If no carrier filter is set, provide a default
@@ -97,7 +104,7 @@ func (s *ShipHawkService) GetRateQuotes(req *models.ShipmentRequest) (*models.Sh
 
 	// Set headers
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.config.ShipHawkAPIKey))
+	httpReq.Header.Set("X-API-KEY", s.config.ShipHawkAPIKey)
 
 	// Send request
 	client := &http.Client{}
@@ -107,14 +114,23 @@ func (s *ShipHawkService) GetRateQuotes(req *models.ShipmentRequest) (*models.Sh
 	}
 	defer resp.Body.Close()
 
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Log the raw response body
+	log.Printf("ShipHawk response body: %s", string(body))
+
 	// Check response status
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("shiphawk API returned status code %d", resp.StatusCode)
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		return nil, fmt.Errorf("ShipHawk API returned status code %d", resp.StatusCode)
 	}
 
 	// Parse response
 	var shipHawkResp models.ShipHawkResponse
-	if err := json.NewDecoder(resp.Body).Decode(&shipHawkResp); err != nil {
+	if err := json.Unmarshal(body, &shipHawkResp); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
