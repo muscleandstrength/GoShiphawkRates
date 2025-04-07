@@ -24,6 +24,7 @@ type PackageItem struct {
 	Width           float64 `json:"width,omitempty"`
 	Height          float64 `json:"height,omitempty"`
 	Weight          float64 `json:"weight"`
+	WeightUOM       string  `json:"weight_uom,omitempty"`
 	Qty             int     `json:"qty,omitempty"`
 	Name            string  `json:"name,omitempty"`
 	Description     string  `json:"description,omitempty"`
@@ -95,7 +96,7 @@ var config Configuration
 
 func init() {
 	// Load .env file if it exists
-	godotenv.Load()
+	_ = godotenv.Load()
 
 	// Set config from environment variables
 	config = Configuration{
@@ -259,7 +260,9 @@ func getRateQuotes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get rates from ShipHawk", http.StatusInternalServerError)
 		return
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
 
 	// Read response body
 	respBody, err := io.ReadAll(resp.Body)
@@ -288,5 +291,5 @@ func getRateQuotes(w http.ResponseWriter, r *http.Request) {
 
 	// Return the response as-is
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(shipHawkResp)
+	_ = json.NewEncoder(w).Encode(shipHawkResp)
 }

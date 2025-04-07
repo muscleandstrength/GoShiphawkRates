@@ -29,6 +29,11 @@
             top: 10px;
             right: 10px;
         }
+        /* Add an asterisk automatically to required fields */
+        .required:after {
+            content: " *";
+            color: #dc3545;
+        }
     </style>
 </head>
 <body>
@@ -80,7 +85,7 @@
                                                 <input type="text" class="form-control" id="originState" value="SC">
                                             </div>
                                             <div class="col-md-4 mb-2">
-                                                <label for="originZip" class="form-label">ZIP Code*</label>
+                                                <label for="originZip" class="form-label required">ZIP Code</label>
                                                 <input type="text" class="form-control" id="originZip" value="29209" required>
                                             </div>
                                             <div class="col-md-6 mb-2">
@@ -102,7 +107,7 @@
                             <h6 class="mb-3">Destination Address</h6>
                             <div class="row mb-3">
                                 <div class="col-md-6 mb-2">
-                                    <label for="destinationZip" class="form-label">ZIP Code*</label>
+                                    <label for="destinationZip" class="form-label required">ZIP Code</label>
                                     <input type="text" class="form-control" id="destinationZip" required>
                                 </div>
                                 <div class="col-md-6 mb-2">
@@ -223,12 +228,24 @@
         <button type="button" class="btn-close remove-item" aria-label="Remove"></button>
         <div class="row">
             <div class="col-md-6 mb-2 visually-hidden">
-                <label class="form-label">Name*</label>
+                <label class="form-label">Name</label>
                 <input type="text" class="form-control item-name">
             </div>
             <div class="col-md-6 mb-2 visually-hidden">
                 <label class="form-label">SKU</label>
                 <input type="text" class="form-control item-sku">
+            </div>
+            <div class="col-md-4 mb-2">
+                <label class="form-label required">Weight (lbs)</label>
+                <input type="number" class="form-control item-weight" required min="0.1" step="0.01">
+            </div>
+            <div class="col-md-4 mb-2">
+                <label class="form-label required">Quantity</label>
+                <input type="number" class="form-control item-quantity" value="1" required min="1" step="1">
+            </div>
+            <div class="col-md-4 mb-2">
+                <label class="form-label">HS Code</label>
+                <input type="text" class="form-control item-hscode">
             </div>
             <div class="col-md-6 mb-2">
                 <label class="form-label">Description</label>
@@ -237,18 +254,6 @@
             <div class="col-md-6 mb-2">
                 <label class="form-label">Value ($)</label>
                 <input type="number" class="form-control item-value" min="0" step="0.01">
-            </div>
-            <div class="col-md-4 mb-2">
-                <label class="form-label">Weight (lbs)*</label>
-                <input type="number" class="form-control item-weight" required min="0.1" step="0.01">
-            </div>
-            <div class="col-md-4 mb-2">
-                <label class="form-label">Quantity*</label>
-                <input type="number" class="form-control item-quantity" value="1" required min="1" step="1">
-            </div>
-            <div class="col-md-4 mb-2">
-                <label class="form-label">HS Code</label>
-                <input type="text" class="form-control item-hscode">
             </div>
             <div class="col-md-12 mb-2">
                 <p class="mb-2">Dimensions (Optional)</p>

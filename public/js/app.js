@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 description: item.querySelector('.item-description').value.trim(),
                 sku: item.querySelector('.item-sku').value.trim(),
                 weight: parseFloat(item.querySelector('.item-weight').value) || 0,
+                weight_uom: 'lbs',
                 quantity: parseInt(item.querySelector('.item-quantity').value) || 1,
                 value: parseFloat(item.querySelector('.item-value').value) || 0,
                 hs_code: item.querySelector('.item-hscode').value.trim(),
