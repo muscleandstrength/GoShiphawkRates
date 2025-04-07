@@ -1,4 +1,4 @@
-module ShiphawkRating
+module github.com/muscleandstrength/GoShiphawkRates
 
 go 1.24
 
