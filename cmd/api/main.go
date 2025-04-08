@@ -22,13 +22,19 @@ func main() {
 	shipHawkService := services.NewShipHawkService(cfg)
 	carrierService := services.NewCarrierService(cfg)
 
+	// Create USPS service
+	uspsService, err := services.NewUSPSService()
+	if err != nil {
+		log.Fatalf("Failed to create USPS service: %v", err)
+	}
+
 	// Initialize carrier service
 	if err := carrierService.Initialize(); err != nil {
 		log.Fatalf("Failed to initialize carrier service: %v", err)
 	}
 
 	// Create handlers
-	handler := api.NewHandler(shipHawkService, carrierService)
+	handler := api.NewHandler(shipHawkService, uspsService, carrierService)
 
 	// Create a new HTTP server mux
 	mux := http.NewServeMux()

@@ -13,7 +13,6 @@ type Config struct {
 	USPSBaseURL        string
 }
 
-// Load loads configuration from environment variables
 func LoadUSPSConfig() (*Config, error) {
 	// Load .env file if it exists
 	_ = godotenv.Load()

@@ -25,7 +25,6 @@ func NewRateService() (*RateService, error) {
 		ClientID:     config.USPSConsumerKey,
 		ClientSecret: config.USPSConsumerSecret,
 		TokenURL:     fmt.Sprintf("%s/oauth2/v3/token", config.USPSBaseURL),
-		//Scopes:       []string{"shipping"},
 	}
 
 	ctx := context.Background()
@@ -39,53 +38,59 @@ func NewRateService() (*RateService, error) {
 
 // RateRequest represents the request for a rate quote
 type RateRequest struct {
-	FromZipCode   string   `json:"originZIPCode"`
-	ToZipCode     string   `json:"destinationZIPCode"`
-	Weight        float64  `json:"weight"`
-	Length        float64  `json:"length"`
-	Width         float64  `json:"width"`
-	Height        float64  `json:"height"`
-	MailClasses   []string `json:"mailClasses,omitempty"`
-	PriceType     string   `json:"priceType,omitempty"`
-	MailingDate   string   `json:"mailingDate,omitempty"`
-	AccountType   string   `json:"accountType,omitempty"`
-	AccountNumber string   `json:"AccountNumber,omitempty"`
+	FromZipCode   string      `json:"originZIPCode"`
+	ToZipCode     string      `json:"destinationZIPCode"`
+	Weight        float64     `json:"weight"`
+	Length        float64     `json:"length"`
+	Width         float64     `json:"width"`
+	Height        float64     `json:"height"`
+	MailClasses   []MailClass `json:"mailClasses,omitempty"`
+	PriceType     PriceType   `json:"priceType,omitempty"`
+	MailingDate   string      `json:"mailingDate,omitempty"`
+	AccountType   AccountType `json:"accountType,omitempty"`
+	AccountNumber string      `json:"AccountNumber,omitempty"`
+}
+
+// Rate represents an individual shipping rate option
+type Rate struct {
+	Description                  string                       `json:"description"`
+	PriceType                    PriceType                    `json:"priceType"`
+	Price                        float64                      `json:"price"`
+	Weight                       float64                      `json:"weight"`
+	DimWeight                    float64                      `json:"dimWeight"`
+	Fees                         []any                        `json:"fees"`
+	StartDate                    string                       `json:"startDate"`
+	EndDate                      string                       `json:"endDate"`
+	MailClass                    MailClass                    `json:"mailClass"`
+	Zone                         string                       `json:"zone"`
+	ProductName                  string                       `json:"productName"`
+	ProductDefinition            string                       `json:"productDefinition"`
+	ProcessingCategory           ProcessingCategory           `json:"processingCategory"`
+	RateIndicator                RateIndicator                `json:"rateIndicator"`
+	DestinationEntryFacilityType DestinationEntryFacilityType `json:"destinationEntryFacilityType"`
+	SKU                          string                       `json:"SKU"`
+}
+
+// RateOption represents a group of rates with their base price
+type RateOption struct {
+	TotalBasePrice float64 `json:"totalBasePrice"`
+	Rates          []Rate  `json:"rates"`
+	ExtraServices  []struct {
+		ExtraService string  `json:"extraService"`
+		Name         string  `json:"name"`
+		PriceType    string  `json:"priceType"`
+		Price        float64 `json:"price"`
+		Warnings     []struct {
+			WarningCode        string `json:"warningCode"`
+			WarningDescription string `json:"warningDescription"`
+		} `json:"warnings"`
+		SKU string `json:"SKU"`
+	} `json:"extraServices"`
 }
 
 // RateResponse represents the response from the USPS rate API
 type RateResponse struct {
-	RateOptions []struct {
-		TotalBasePrice float64 `json:"totalBasePrice"`
-		Rates          []struct {
-			Description                  string  `json:"description"`
-			PriceType                    string  `json:"priceType"`
-			Price                        float64 `json:"price"`
-			Weight                       float64 `json:"weight"`
-			DimWeight                    float64 `json:"dimWeight"`
-			Fees                         []any   `json:"fees"` // Can be more specific if needed
-			StartDate                    string  `json:"startDate"`
-			EndDate                      string  `json:"endDate"`
-			MailClass                    string  `json:"mailClass"`
-			Zone                         string  `json:"zone"`
-			ProductName                  string  `json:"productName"`
-			ProductDefinition            string  `json:"productDefinition"`
-			ProcessingCategory           string  `json:"processingCategory"`
-			RateIndicator                string  `json:"rateIndicator"`
-			DestinationEntryFacilityType string  `json:"destinationEntryFacilityType"`
-			SKU                          string  `json:"SKU"`
-		} `json:"rates"`
-		ExtraServices []struct {
-			ExtraService string  `json:"extraService"`
-			Name         string  `json:"name"`
-			PriceType    string  `json:"priceType"`
-			Price        float64 `json:"price"`
-			Warnings     []struct {
-				WarningCode        string `json:"warningCode"`
-				WarningDescription string `json:"warningDescription"`
-			} `json:"warnings"`
-			SKU string `json:"SKU"`
-		} `json:"extraServices"`
-	} `json:"rateOptions"`
+	RateOptions []RateOption `json:"rateOptions"`
 }
 
 // GetRates retrieves shipping rates from USPS

@@ -13,13 +13,15 @@ import (
 // Handler struct holds the service dependencies
 type Handler struct {
 	shipHawkService *services.ShipHawkService
+	uspsService     *services.USPSService
 	carrierService  *services.CarrierService
 }
 
 // NewHandler creates a new Handler instance
-func NewHandler(shipHawkService *services.ShipHawkService, carrierService *services.CarrierService) *Handler {
+func NewHandler(shipHawkService *services.ShipHawkService, uspsService *services.USPSService, carrierService *services.CarrierService) *Handler {
 	return &Handler{
 		shipHawkService: shipHawkService,
+		uspsService:     uspsService,
 		carrierService:  carrierService,
 	}
 }
@@ -62,14 +64,28 @@ func (h *Handler) GetRateQuotes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create a combined response
+	combinedResponse := models.ShipHawkResponse{
+		Rates: []models.Rate{},
+	}
+
 	// Get rate quotes from ShipHawk
-	resp, err := h.shipHawkService.GetRateQuotes(&shipmentReq)
+	shipHawkResp, err := h.shipHawkService.GetRateQuotes(&shipmentReq)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		log.Printf("Error getting ShipHawk rates: %v", err)
+	} else {
+		combinedResponse.Rates = append(combinedResponse.Rates, shipHawkResp.Rates...)
+	}
+
+	// Get rate quotes from USPS
+	uspsRates, err := h.uspsService.GetRateQuotes(&shipmentReq)
+	if err != nil {
+		log.Printf("Error getting USPS rates: %v", err)
+	} else {
+		combinedResponse.Rates = append(combinedResponse.Rates, uspsRates...)
 	}
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(combinedResponse)
 }

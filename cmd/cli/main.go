@@ -47,7 +47,7 @@ func main() {
 		Length:      *length,
 		Width:       *width,
 		Height:      *height,
-		MailClasses: []string{"PRIORITY_MAIL", "USPS_GROUND_ADVANTAGE"},
+		MailClasses: []usps.MailClass{usps.PriorityMailExpress, usps.PriorityMail, usps.GroundAdvantage},
 		PriceType:   "COMMERCIAL",
 		MailingDate: time.Now().AddDate(0, 0, 3).Format("2006-01-02"),
 		AccountType: "EPS",
