@@ -7,9 +7,6 @@ Type=simple
 WorkingDirectory=/home/abonner/webapps/GoShiphawkRates
 ExecStart=/home/abonner/webapps/GoShiphawkRates/bin/GoShiphawkRates
 
-# Alternatively, if your binary has a different name or location:
-# ExecStart=/home/abonner/webapps/GoShiphawkRates/bin/app
-
 StandardOutput=append:/home/abonner/webapps/GoShiphawkRates/logs/goshiphawk.out.log
 StandardError=append:/home/abonner/webapps/GoShiphawkRates/logs/goshiphawk.err.log
 

@@ -6,20 +6,26 @@ GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BIN_DIR=bin
 BINARY_NAME=GoShiphawkRates
+USPS_CLIENT_BINARY=usps
 MAIN_PATH=cmd/api/main.go
+USPS_CLIENT_PATH=cmd/cli/main.go
 # Build flags
 LDFLAGS=-ldflags "-s -w"
 
-.PHONY: all build clean test run
+.PHONY: all build clean test run build-usps-client
 
-all: clean build
+all: clean build build-usps-client
 
 build:
 	$(GOBUILD) $(LDFLAGS) -o $(BIN_DIR)/$(BINARY_NAME) $(MAIN_PATH)
 
+build-usps-client:
+	$(GOBUILD) $(LDFLAGS) -o $(BIN_DIR)/$(USPS_CLIENT_BINARY) $(USPS_CLIENT_PATH)
+
 clean:
 	$(GOCLEAN)
 	rm -f $(BIN_DIR)/$(BINARY_NAME)
+	rm -f $(BIN_DIR)/$(USPS_CLIENT_BINARY)
 
 test:
 	$(GOTEST) -v ./...
@@ -57,6 +63,7 @@ help:
 	@echo "Available targets:"
 	@echo "  all         - Clean and build the project"
 	@echo "  build       - Build the project"
+	@echo "  build-usps-client - Build the USPS client CLI tool"
 	@echo "  clean       - Remove build artifacts"
 	@echo "  test        - Run tests"
 	@echo "  run         - Run the application"

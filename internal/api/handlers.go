@@ -53,11 +53,11 @@ func (h *Handler) GetRateQuotes(w http.ResponseWriter, r *http.Request) {
 
 	// Log the raw body for debugging
 	log.Printf("Raw request body: %s\n", bodyText)
-	
+
 	// Parse request body
 	var shipmentReq models.ShipmentRequest
 	if err := json.Unmarshal(body, &shipmentReq); err != nil {
-		log.Printf(err.Error())
+		log.Print(err.Error())
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
