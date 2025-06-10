@@ -6,21 +6,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Go-based shipping rate comparison service that integrates with multiple carriers (ShipHawk and USPS) to provide rate quotes. The application consists of:
 
-- **API Server** (`cmd/api/main.go`): HTTP server that serves both API endpoints and static frontend
+- **API Server** (`cmd/api/main.go`): HTTP server that serves both API endpoints and React frontend
 - **CLI Tool** (`cmd/cli/main.go`): Command-line USPS rate quoting tool
-- **Frontend**: Bootstrap-based web interface for rate comparison
+- **Frontend**: React 19 + TypeScript + Tailwind CSS web interface for rate comparison
 
 ## Build Commands
 
 ### Development
 - `make run` - Run the API server in development mode
+- `make dev-frontend` - Run the React frontend dev server (port 3000)
 - `make test` - Run all tests
 - `make lint` - Run linter (requires golangci-lint)
 
 ### Building
-- `make build` - Build the main API server to `bin/GoShiphawkRates`
+- `make build` - Build the Go backend to `bin/GoShiphawkRates`
+- `make build-frontend` - Build the React frontend to `dist/`
 - `make build-usps-client` - Build the CLI tool to `bin/usps`
-- `make all` - Clean and build both binaries
+- `make all` - Clean and build both frontend and backend
 - `make clean` - Remove build artifacts
 
 ### CLI Usage

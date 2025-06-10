@@ -32,13 +32,14 @@ type Address struct {
 
 // ShipmentRequest represents the request for rate quotes
 type ShipmentRequest struct {
-	OriginZip          string        `json:"origin_zip,omitempty"`
-	DestinationZip     string        `json:"destination_zip,omitempty"`
-	Items              []PackageItem `json:"items"`
-	OriginAddress      *Address      `json:"origin_address,omitempty"`
-	DestinationAddress *Address      `json:"destination_address,omitempty"`
-	WarehouseCode      string        `json:"warehouse_code,omitempty"`
-	CarrierFilter      []string      `json:"carrier_filter,omitempty"`
+	OriginZip             string        `json:"origin_zip,omitempty"`
+	DestinationZip        string        `json:"destination_zip,omitempty"`
+	DestinationCountryID  string        `json:"destination_country_id,omitempty"`
+	Items                 []PackageItem `json:"items"`
+	OriginAddress         *Address      `json:"origin_address,omitempty"`
+	DestinationAddress    *Address      `json:"destination_address,omitempty"`
+	WarehouseCode         string        `json:"warehouse_code,omitempty"`
+	CarrierFilter         []string      `json:"carrier_filter,omitempty"`
 }
 
 // ShipHawkRequest represents the request format for ShipHawk API

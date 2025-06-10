@@ -43,8 +43,8 @@ func main() {
 	mux.HandleFunc("GET /api/carriers", handler.GetCarriers)
 	mux.HandleFunc("POST /api/quote", handler.GetRateQuotes)
 
-	// Serve static files for the frontend
-	fileServer := http.FileServer(http.Dir("./public"))
+	// Serve static files for the frontend (React build output)
+	fileServer := http.FileServer(http.Dir("./dist"))
 	mux.Handle("/", fileServer)
 
 	// Add middleware for CORS

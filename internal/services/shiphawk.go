@@ -54,10 +54,19 @@ func (s *ShipHawkService) GetRateQuotes(req *models.ShipmentRequest) (*models.Sh
 	}
 
 	if shipHawkReq.DestinationAddress == nil && req.DestinationZip != "" {
+		country := "US" // Default to US
+		if req.DestinationCountryID != "" {
+			country = req.DestinationCountryID
+		}
 		shipHawkReq.DestinationAddress = &models.Address{
 			Zip:     req.DestinationZip,
-			Country: "US",
+			Country: country,
 		}
+	}
+
+	// Ensure destination address has correct country from request
+	if shipHawkReq.DestinationAddress != nil && req.DestinationCountryID != "" {
+		shipHawkReq.DestinationAddress.Country = req.DestinationCountryID
 	}
 
 	// Ensure all items have quantity set (convert from Qty if needed)

@@ -12,9 +12,9 @@ USPS_CLIENT_PATH=cmd/cli/main.go
 # Build flags
 LDFLAGS=-ldflags "-s -w"
 
-.PHONY: all build clean test run build-usps-client
+.PHONY: all build clean test run build-usps-client build-frontend
 
-all: clean build build-usps-client
+all: clean build-frontend build build-usps-client
 
 build:
 	$(GOBUILD) $(LDFLAGS) -o $(BIN_DIR)/$(BINARY_NAME) $(MAIN_PATH)
@@ -22,16 +22,25 @@ build:
 build-usps-client:
 	$(GOBUILD) $(LDFLAGS) -o $(BIN_DIR)/$(USPS_CLIENT_BINARY) $(USPS_CLIENT_PATH)
 
+build-frontend:
+	npm install
+	npm run build
+
 clean:
 	$(GOCLEAN)
 	rm -f $(BIN_DIR)/$(BINARY_NAME)
 	rm -f $(BIN_DIR)/$(USPS_CLIENT_BINARY)
+	rm -rf dist
+	rm -rf node_modules
 
 test:
 	$(GOTEST) -v ./...
 
 run:
 	$(GOCMD) run $(MAIN_PATH)
+
+dev-frontend:
+	npm run dev
 
 # Cross-compilation targets
 build-linux:
@@ -64,12 +73,14 @@ lint:
 # Help target
 help:
 	@echo "Available targets:"
-	@echo "  all         - Clean and build the project"
-	@echo "  build       - Build the project"
+	@echo "  all         - Clean and build the project (including frontend)"
+	@echo "  build       - Build the Go backend"
+	@echo "  build-frontend - Build the React frontend"
 	@echo "  build-usps-client - Build the USPS client CLI tool"
 	@echo "  clean       - Remove build artifacts"
 	@echo "  test        - Run tests"
-	@echo "  run         - Run the application"
+	@echo "  run         - Run the Go backend"
+	@echo "  dev-frontend - Run the frontend dev server"
 	@echo "  build-linux - Build for Linux"
 	@echo "  build-mac   - Build for macOS"
 	@echo "  build-win   - Build for Windows"
