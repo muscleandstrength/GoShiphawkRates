@@ -1,4 +1,7 @@
 .env
 .idea
-/bin/*
 node_modules
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+logs/
+
