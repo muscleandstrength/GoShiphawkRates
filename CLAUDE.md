@@ -4,30 +4,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Go-based shipping rate comparison service that integrates with multiple carriers (ShipHawk and USPS) to provide rate quotes. The application consists of:
+This is a Go-based shipping rate comparison service that integrates with multiple carriers (ShipHawk and USPS) to provide rate quotes. The project is organized into separate backend and frontend directories:
 
-- **API Server** (`cmd/api/main.go`): HTTP server that serves both API endpoints and React frontend
-- **CLI Tool** (`cmd/cli/main.go`): Command-line USPS rate quoting tool
-- **Frontend**: React 19 + TypeScript + Tailwind CSS web interface for rate comparison
+- **Backend** (`backend/`): Go application with API server and CLI tool
+  - **API Server** (`backend/cmd/api/main.go`): HTTP server that serves both API endpoints and React frontend
+  - **CLI Tool** (`backend/cmd/cli/main.go`): Command-line USPS rate quoting tool
+- **Frontend** (`frontend/`): React 19 + TypeScript + Tailwind CSS web interface for rate comparison
 
 ## Build Commands
 
 ### Development
-- `make run` - Run the API server in development mode
-- `make dev-frontend` - Run the React frontend dev server (port 3000)
-- `make test` - Run all tests
-- `make lint` - Run linter (requires golangci-lint)
+All commands should be run from the `backend/` directory:
+- `cd backend && make run` - Run the API server in development mode
+- `cd backend && make dev-frontend` - Run the React frontend dev server (port 3000)
+- `cd backend && make test` - Run all tests
+- `cd backend && make lint` - Run linter (requires golangci-lint)
 
 ### Building
-- `make build` - Build the Go backend to `bin/GoShiphawkRates`
-- `make build-frontend` - Build the React frontend to `dist/`
-- `make build-usps-client` - Build the CLI tool to `bin/usps`
-- `make all` - Clean and build both frontend and backend
-- `make clean` - Remove build artifacts
+All commands should be run from the `backend/` directory:
+- `cd backend && make build` - Build the Go backend to `backend/bin/GoShiphawkRates`
+- `cd backend && make build-frontend` - Build the React frontend to `frontend/dist/`
+- `cd backend && make build-usps-client` - Build the CLI tool to `backend/bin/usps`
+- `cd backend && make all` - Clean and build both frontend and backend
+- `cd backend && make clean` - Remove build artifacts
 
 ### CLI Usage
 ```bash
-./bin/usps -from 29209 -to 90210 -weight 2.5 -length 12 -width 8 -height 6 -verbose
+./backend/bin/usps -from 29209 -to 90210 -weight 2.5 -length 12 -width 8 -height 6 -verbose
 ```
 
 ## Architecture
@@ -35,9 +38,9 @@ This is a Go-based shipping rate comparison service that integrates with multipl
 ### Service Layer Architecture
 The application uses a service-oriented architecture with clear separation of concerns:
 
-- **Config Service** (`internal/config/`): Environment-based configuration with `.env` file support
-- **Handler Layer** (`internal/api/handlers.go`): HTTP request handling with combined rate aggregation
-- **Service Layer** (`internal/services/`):
+- **Config Service** (`backend/internal/config/`): Environment-based configuration with `.env` file support
+- **Handler Layer** (`backend/internal/api/handlers.go`): HTTP request handling with combined rate aggregation
+- **Service Layer** (`backend/internal/services/`):
   - `ShipHawkService`: Integrates with ShipHawk API for carrier rates
   - `USPSService`: Integrates with USPS API using OAuth2 client credentials
   - `CarrierService`: Manages available carriers and filtering
@@ -71,7 +74,7 @@ Optional:
 
 ## Testing
 
-Run tests with: `make test`
+Run tests with: `cd backend && make test`
 
 The test suite should validate:
 - Rate request/response transformations

@@ -1,0 +1,30 @@
+[Unit]
+Description=GoShiphawkRates Web Application
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/abonner/webapps/GoShiphawkRates
+ExecStart=/home/abonner/webapps/GoShiphawkRates/bin/GoShiphawkRates
+
+StandardOutput=append:/home/abonner/webapps/GoShiphawkRates/logs/goshiphawk.out.log
+StandardError=append:/home/abonner/webapps/GoShiphawkRates/logs/goshiphawk.err.log
+
+# Restart the service if it fails
+Restart=on-failure
+RestartSec=5s
+
+# Environment variables if needed
+# Environment=ENV_VAR1=value1
+# Environment=ENV_VAR2=value2
+
+# Limit resource usage if desired
+# LimitNOFILE=1024
+
+# Security enhancements
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
