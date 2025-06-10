@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/abonner/webapps/GoShiphawkRates
-ExecStart=/home/abonner/webapps/GoShiphawkRates/bin/GoShiphawkRates
+WorkingDirectory=/home/abonner/webapps/GoShiphawkRates/backend
+ExecStart=/home/abonner/webapps/GoShiphawkRates/backend/bin/GoShiphawkRates
 
 StandardOutput=append:/home/abonner/webapps/GoShiphawkRates/logs/goshiphawk.out.log
 StandardError=append:/home/abonner/webapps/GoShiphawkRates/logs/goshiphawk.err.log
