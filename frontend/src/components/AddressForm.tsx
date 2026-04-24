@@ -24,8 +24,10 @@ export function AddressForm({
   const handleChange = (field: keyof Address, value: string) => {
     const updatedAddress = { ...address, [field]: value }
     
-    // Auto-detect country from postal code
-    if (field === 'zip' && value.trim()) {
+    // Auto-detect country from postal code only while the country is US
+    // (the default). Once the user has picked a non-US country explicitly,
+    // don't override their choice when they type the postcode.
+    if (field === 'zip' && value.trim() && (address.country || 'US') === 'US') {
       const detectedCountry = detectCountryFromPostalCode(value)
       if (detectedCountry) {
         updatedAddress.country = detectedCountry.code

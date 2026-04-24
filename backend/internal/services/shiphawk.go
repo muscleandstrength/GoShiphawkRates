@@ -132,16 +132,31 @@ func (s *ShipHawkService) GetRateQuotes(req *models.ShipmentRequest) (*models.Sh
 	// Log the raw response body
 	log.Printf("ShipHawk response body: %s", string(body))
 
-	// Check response status
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("ShipHawk API returned status code %d", resp.StatusCode)
+	// Parse response body regardless of status — on 422 ShipHawk still returns
+	// per-carrier errors in the body that callers want to surface to the user.
+	var shipHawkResp models.ShipHawkResponse
+	parseErr := json.Unmarshal(body, &shipHawkResp)
+
+	debug := &models.ShipHawkDebug{
+		Request:  json.RawMessage(requestBody),
+		Response: json.RawMessage(body),
+		Status:   resp.StatusCode,
 	}
 
-	// Parse response
-	var shipHawkResp models.ShipHawkResponse
-	if err := json.Unmarshal(body, &shipHawkResp); err != nil {
-		return nil, fmt.Errorf("failed to parse response: %w", err)
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		if parseErr == nil && (len(shipHawkResp.Errors) > 0 || len(shipHawkResp.Rates) > 0) {
+			shipHawkResp.Debug = debug
+			return &shipHawkResp, fmt.Errorf("ShipHawk API returned status %d with %d errors", resp.StatusCode, len(shipHawkResp.Errors))
+		}
+		// Non-2xx with no parseable body: still surface the debug info via a minimal response.
+		return &models.ShipHawkResponse{Debug: debug}, fmt.Errorf("ShipHawk API returned status code %d", resp.StatusCode)
 	}
+
+	if parseErr != nil {
+		return &models.ShipHawkResponse{Debug: debug}, fmt.Errorf("failed to parse response: %w", parseErr)
+	}
+
+	shipHawkResp.Debug = debug
 
 	return &shipHawkResp, nil
 }

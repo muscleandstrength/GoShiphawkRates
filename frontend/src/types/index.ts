@@ -43,10 +43,27 @@ export interface Rate {
   price: string;
   service_days?: number;
   est_delivery_date?: string;
+  [key: string]: unknown;
+}
+
+export interface ShipHawkError {
+  message: string;
+  carrier_name?: string;
+  carrier_code?: string;
+  carrier_type?: string;
+}
+
+export interface ShipHawkDebug {
+  request?: unknown;
+  response?: unknown;
+  status?: number;
 }
 
 export interface QuoteResponse {
   rates: Rate[];
+  errors?: ShipHawkError[];
+  warnings?: ShipHawkError[];
+  debug?: ShipHawkDebug;
 }
 
 export interface Carrier {

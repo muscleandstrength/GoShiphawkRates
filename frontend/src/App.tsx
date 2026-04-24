@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { ShipmentForm } from './components/ShipmentForm'
 import { RateResults } from './components/RateResults'
-import { ShipmentRequest, Rate, Carrier } from './types'
+import { ShipmentRequest, Rate, Carrier, ShipHawkError, ShipHawkDebug, QuoteResponse } from './types'
 
 function App() {
   const [rates, setRates] = useState<Rate[]>([])
+  const [errors, setErrors] = useState<ShipHawkError[]>([])
+  const [warnings, setWarnings] = useState<ShipHawkError[]>([])
+  const [debug, setDebug] = useState<ShipHawkDebug | undefined>(undefined)
   const [loading, setLoading] = useState(false)
   const [carriers, setCarriers] = useState<Carrier[]>([])
 
@@ -19,6 +22,9 @@ function App() {
   const handleQuoteRequest = async (request: ShipmentRequest) => {
     setLoading(true)
     setRates([])
+    setErrors([])
+    setWarnings([])
+    setDebug(undefined)
 
     try {
       const response = await fetch('/api/quote', {
@@ -30,14 +36,17 @@ function App() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to get rates')
+        throw new Error(`Quote request failed with status ${response.status}`)
       }
 
-      const data = await response.json()
+      const data: QuoteResponse = await response.json()
       setRates(data.rates || [])
+      setErrors(data.errors || [])
+      setWarnings(data.warnings || [])
+      setDebug(data.debug)
     } catch (error) {
       console.error('Error:', error)
-      alert('Failed to get shipping rates. Please try again.')
+      setErrors([{ message: error instanceof Error ? error.message : 'Failed to get shipping rates.' }])
     } finally {
       setLoading(false)
     }
@@ -60,8 +69,11 @@ function App() {
           </div>
           
           <div>
-            <RateResults 
+            <RateResults
               rates={rates}
+              errors={errors}
+              warnings={warnings}
+              debug={debug}
               loading={loading}
             />
           </div>

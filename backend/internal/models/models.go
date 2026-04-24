@@ -1,5 +1,7 @@
 package models
 
+import "encoding/json"
+
 // PackageItem represents a single item to be shipped
 type PackageItem struct {
 	Length          float64 `json:"length,omitempty"`
@@ -70,9 +72,29 @@ type Rate struct {
 	InsurancePrice      float64 `json:"insurance_price"`
 }
 
+// ShipHawkError is one per-carrier error entry from ShipHawk.
+type ShipHawkError struct {
+	Message     string `json:"message"`
+	CarrierName string `json:"carrier_name,omitempty"`
+	CarrierCode string `json:"carrier_code,omitempty"`
+	CarrierType string `json:"carrier_type,omitempty"`
+}
+
+// ShipHawkDebug carries raw request/response bodies so callers can inspect
+// everything ShipHawk sent — including fields we don't currently parse into
+// the typed Rate struct (duties, taxes, quoted_value, surcharges, etc.).
+type ShipHawkDebug struct {
+	Request  json.RawMessage `json:"request,omitempty"`
+	Response json.RawMessage `json:"response,omitempty"`
+	Status   int             `json:"status,omitempty"`
+}
+
 // ShipHawkResponse represents the response from ShipHawk API
 type ShipHawkResponse struct {
-	Rates []Rate `json:"rates"`
+	Rates    []Rate          `json:"rates"`
+	Errors   []ShipHawkError `json:"errors,omitempty"`
+	Warnings []ShipHawkError `json:"warnings,omitempty"`
+	Debug    *ShipHawkDebug  `json:"debug,omitempty"`
 }
 
 type Carrier struct {
@@ -83,8 +105,8 @@ type Carrier struct {
 	Name                string   `json:"name"`
 	IsEnabled           bool     `json:"is_enabled"`
 	Activatable         bool     `json:"activatable"`
-	RequiredCredentials []string `json:"required_credentials"`
-	OptionalCredentials []string `json:"optional_credentials"`
+	RequiredCredentials []json.RawMessage `json:"required_credentials"`
+	OptionalCredentials []json.RawMessage `json:"optional_credentials"`
 	TestMode            bool     `json:"test_mode"`
 	Status              string   `json:"status"`
 	Logo                string   `json:"logo"`

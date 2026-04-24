@@ -40,7 +40,7 @@ func Load() (*Config, error) {
 	return config, nil
 }
 
-// Errors
+// ErrMissingAPIKey Errors
 var (
 	ErrMissingAPIKey = &ConfigError{"SHIPHAWK_API_KEY environment variable is required"}
 )

@@ -31,8 +31,13 @@ export function ShipmentForm({ onSubmit, carriers, loading }: ShipmentFormProps)
     weight_uom: 'lbs',
     quantity: 1,
     country_of_origin: 'US',
+    hs_code: '21061000',
+    description: 'Nutritional Supplements',
+    value: 100,
   }])
   const [carrierFilter, setCarrierFilter] = useState<string[]>([])
+
+  const normalizeZip = (zip: string | undefined) => (zip || '').replace(/\s+/g, '')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,6 +55,9 @@ export function ShipmentForm({ onSubmit, carriers, loading }: ShipmentFormProps)
       return
     }
 
+    const normalizedOrigin: Address = { ...originAddress, zip: normalizeZip(originAddress.zip) }
+    const normalizedDestination: Address = { ...destinationAddress, zip: normalizeZip(destinationAddress.zip) }
+
     // Create request
     const request: ShipmentRequest = {
       items: packages,
@@ -58,26 +66,26 @@ export function ShipmentForm({ onSubmit, carriers, loading }: ShipmentFormProps)
     }
 
     // Add addresses if they have required fields
-    if (hasRequiredAddressFields(originAddress)) {
-      request.origin_address = cleanEmptyAddressFields(originAddress)
+    if (hasRequiredAddressFields(normalizedOrigin)) {
+      request.origin_address = cleanEmptyAddressFields(normalizedOrigin)
     }
 
-    if (hasRequiredAddressFields(destinationAddress)) {
-      request.destination_address = cleanEmptyAddressFields(destinationAddress)
+    if (hasRequiredAddressFields(normalizedDestination)) {
+      request.destination_address = cleanEmptyAddressFields(normalizedDestination)
     }
 
     // For backward compatibility
-    if (originAddress.zip) {
-      request.origin_zip = originAddress.zip
+    if (normalizedOrigin.zip) {
+      request.origin_zip = normalizedOrigin.zip
     }
 
-    if (destinationAddress.zip) {
-      request.destination_zip = destinationAddress.zip
+    if (normalizedDestination.zip) {
+      request.destination_zip = normalizedDestination.zip
     }
 
     // Always include destination country
-    if (destinationAddress.country) {
-      request.destination_country_id = destinationAddress.country
+    if (normalizedDestination.country) {
+      request.destination_country_id = normalizedDestination.country
     }
 
     onSubmit(request)

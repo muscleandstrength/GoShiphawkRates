@@ -4,6 +4,8 @@ GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
+BACKEND_DIR=backend
+FRONTEND_DIR=frontend
 BIN_DIR=bin
 BINARY_NAME=GoShiphawkRates
 USPS_CLIENT_BINARY=usps
@@ -12,48 +14,54 @@ USPS_CLIENT_PATH=cmd/cli/main.go
 # Build flags
 LDFLAGS=-ldflags "-s -w"
 
-.PHONY: all build clean test run build-usps-client build-frontend
+.PHONY: all build clean test run dev dev-frontend build-usps-client build-frontend
 
 all: clean build-frontend build build-usps-client
 
 build:
-	$(GOBUILD) $(LDFLAGS) -o $(BIN_DIR)/$(BINARY_NAME) $(MAIN_PATH)
+	cd $(BACKEND_DIR) && $(GOBUILD) $(LDFLAGS) -o $(BIN_DIR)/$(BINARY_NAME) $(MAIN_PATH)
 
 build-usps-client:
-	$(GOBUILD) $(LDFLAGS) -o $(BIN_DIR)/$(USPS_CLIENT_BINARY) $(USPS_CLIENT_PATH)
+	cd $(BACKEND_DIR) && $(GOBUILD) $(LDFLAGS) -o $(BIN_DIR)/$(USPS_CLIENT_BINARY) $(USPS_CLIENT_PATH)
 
 build-frontend:
-	cd ../frontend && npm install
-	cd ../frontend && npm run build
+	cd $(FRONTEND_DIR) && pnpm install
+	cd $(FRONTEND_DIR) && pnpm build
 
 clean:
-	$(GOCLEAN)
-	rm -f $(BIN_DIR)/$(BINARY_NAME)
-	rm -f $(BIN_DIR)/$(USPS_CLIENT_BINARY)
-	rm -rf ../frontend/dist
-	rm -rf ../frontend/node_modules
+	cd $(BACKEND_DIR) && $(GOCLEAN)
+	rm -f $(BACKEND_DIR)/$(BIN_DIR)/$(BINARY_NAME)
+	rm -f $(BACKEND_DIR)/$(BIN_DIR)/$(USPS_CLIENT_BINARY)
+	rm -rf $(FRONTEND_DIR)/dist
+	rm -rf $(FRONTEND_DIR)/node_modules
 
 test:
-	$(GOTEST) -v ./...
+	cd $(BACKEND_DIR) && $(GOTEST) -v ./...
 
 run:
-	$(GOCMD) run $(MAIN_PATH)
+	cd $(BACKEND_DIR) && $(GOCMD) run $(MAIN_PATH)
 
 dev-frontend:
-	cd ../frontend && npm run dev
+	cd $(FRONTEND_DIR) && pnpm dev
+
+dev:
+	@trap 'kill 0' EXIT INT TERM; \
+	(cd $(BACKEND_DIR) && $(GOCMD) run $(MAIN_PATH)) & \
+	(cd $(FRONTEND_DIR) && pnpm dev) & \
+	wait
 
 # Cross-compilation targets
 build-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-linux $(MAIN_PATH)
+	cd $(BACKEND_DIR) && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-linux $(MAIN_PATH)
 
 build-mac-intel:
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-mac $(MAIN_PATH)
+	cd $(BACKEND_DIR) && CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-mac $(MAIN_PATH)
 
 build-mac-arm:
-	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-mac $(MAIN_PATH)
+	cd $(BACKEND_DIR) && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-mac $(MAIN_PATH)
 
 build-windows:
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-windows.exe $(MAIN_PATH)
+	cd $(BACKEND_DIR) && CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o $(BINARY_NAME)-windows.exe $(MAIN_PATH)
 
 # Docker targets
 docker-build:
@@ -68,7 +76,7 @@ install-tools:
 	$(GOGET) -u github.com/golangci/golangci-lint/cmd/golangci-lint
 
 lint:
-	golangci-lint run
+	cd $(BACKEND_DIR) && golangci-lint run
 
 # Help target
 help:
@@ -80,6 +88,7 @@ help:
 	@echo "  clean       - Remove build artifacts"
 	@echo "  test        - Run tests"
 	@echo "  run         - Run the Go backend"
+	@echo "  dev         - Run backend and frontend dev servers together"
 	@echo "  dev-frontend - Run the frontend dev server"
 	@echo "  build-linux - Build for Linux"
 	@echo "  build-mac   - Build for macOS"

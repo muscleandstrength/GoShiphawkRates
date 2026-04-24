@@ -69,20 +69,38 @@ func (h *Handler) GetRateQuotes(w http.ResponseWriter, r *http.Request) {
 		Rates: []models.Rate{},
 	}
 
-	// Get rate quotes from ShipHawk
+	// Get rate quotes from ShipHawk — may return a non-nil response even on error
+	// (e.g. 422 with per-carrier error messages in the body).
 	shipHawkResp, err := h.shipHawkService.GetRateQuotes(&shipmentReq)
+	if shipHawkResp != nil {
+		combinedResponse.Rates = append(combinedResponse.Rates, shipHawkResp.Rates...)
+		combinedResponse.Errors = append(combinedResponse.Errors, shipHawkResp.Errors...)
+		combinedResponse.Warnings = append(combinedResponse.Warnings, shipHawkResp.Warnings...)
+		combinedResponse.Debug = shipHawkResp.Debug
+	}
 	if err != nil {
 		log.Printf("Error getting ShipHawk rates: %v", err)
-	} else {
-		combinedResponse.Rates = append(combinedResponse.Rates, shipHawkResp.Rates...)
+		if shipHawkResp == nil {
+			combinedResponse.Errors = append(combinedResponse.Errors, models.ShipHawkError{
+				Message:     err.Error(),
+				CarrierName: "ShipHawk",
+			})
+		}
 	}
 
-	// Get rate quotes from USPS
-	uspsRates, err := h.uspsService.GetRateQuotes(&shipmentReq)
-	if err != nil {
-		log.Printf("Error getting USPS rates: %v", err)
-	} else {
-		combinedResponse.Rates = append(combinedResponse.Rates, uspsRates...)
+	// Get rate quotes from the direct USPS integration (skipped when disabled).
+	if h.uspsService.Enabled() {
+		uspsRates, err := h.uspsService.GetRateQuotes(&shipmentReq)
+		if err != nil {
+			log.Printf("Error getting USPS rates: %v", err)
+			combinedResponse.Errors = append(combinedResponse.Errors, models.ShipHawkError{
+				Message:     err.Error(),
+				CarrierName: "USPS",
+				CarrierCode: "usps",
+			})
+		} else {
+			combinedResponse.Rates = append(combinedResponse.Rates, uspsRates...)
+		}
 	}
 
 	// Return response

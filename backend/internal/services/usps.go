@@ -3,19 +3,30 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/muscleandstrength/GoShiphawkRates/internal/models"
 	"github.com/muscleandstrength/GoShiphawkRates/internal/usps"
 )
 
-// USPSService handles interactions with the USPS API
+// USPSService handles interactions with the direct USPS API (distinct from
+// ShipHawk's USPS carrier, which flows through the ShipHawk service).
 type USPSService struct {
 	uspsClient *usps.RateService
+	enabled    bool
 }
 
-// NewUSPSService creates a new USPSService instance
+// NewUSPSService creates a new USPSService instance. If USPS_CONSUMER_KEY or
+// USPS_CONSUMER_SECRET is unset, returns a disabled service that short-circuits
+// rate requests — this lets the app run without direct USPS credentials.
 func NewUSPSService() (*USPSService, error) {
+	if os.Getenv("USPS_CONSUMER_KEY") == "" || os.Getenv("USPS_CONSUMER_SECRET") == "" {
+		log.Printf("USPS direct integration disabled: USPS_CONSUMER_KEY or USPS_CONSUMER_SECRET not set")
+		return &USPSService{enabled: false}, nil
+	}
+
 	client, err := usps.NewRateService()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create USPS service: %w", err)
@@ -23,11 +34,20 @@ func NewUSPSService() (*USPSService, error) {
 
 	return &USPSService{
 		uspsClient: client,
+		enabled:    true,
 	}, nil
+}
+
+// Enabled reports whether the direct USPS integration is active.
+func (s *USPSService) Enabled() bool {
+	return s.enabled
 }
 
 // GetRateQuotes gets shipping rate quotes from USPS
 func (s *USPSService) GetRateQuotes(req *models.ShipmentRequest) ([]models.Rate, error) {
+	if !s.enabled {
+		return nil, nil
+	}
 	// Convert ShipmentRequest to USPS RateRequest
 	uspsReq := usps.RateRequest{
 		FromZipCode: req.OriginZip,
